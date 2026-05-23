@@ -1,0 +1,33 @@
+# Maven
+target/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+.project
+.classpath
+
+# H2 Database
+*.mv.db
+*.trace.db
+data/
+
+# Logs
+logs/
+*.log
+
+# Env
+.env
