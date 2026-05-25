@@ -1,0 +1,21 @@
+server:
+  port: 9012
+
+spring:
+  application:
+    name: API-Gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            # Leave Service Routes
+            - id: leave-service
+              uri: lb://leave-service
+              predicates:
+                - Path=/leave/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone : http://localhost:8761/eureka/

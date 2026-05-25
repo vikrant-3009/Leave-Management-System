@@ -2,6 +2,7 @@ package com.nagarro.nagp.AuthService.config;
 
 import com.nagarro.nagp.AuthService.entity.Role;
 import com.nagarro.nagp.AuthService.entity.User;
+import com.nagarro.nagp.AuthService.exception.UserNotFoundException;
 import com.nagarro.nagp.AuthService.jwt.AuthEntryPointJwt;
 import com.nagarro.nagp.AuthService.jwt.AuthTokenFilter;
 import com.nagarro.nagp.AuthService.repository.RoleRepository;
@@ -10,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -65,7 +64,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CommandLineRunner initData(UserRepository userRepository, RoleRepository roleRepository) {
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration builder) throws Exception {
+//        return builder.getAuthenticationManager();
+//    }
+
+    @Bean
+    public CommandLineRunner initData(UserRepository userRepository, RoleRepository roleRepository)
+            throws UserNotFoundException {
         return args -> {
 
             Role employeeRole = roleRepository
@@ -90,46 +100,32 @@ public class SecurityConfig {
                 manager.setId(UUID.randomUUID().toString());
                 manager.setUsername("manager1");
                 manager.setPassword(passwordEncoder().encode("manager1"));
-                manager.setEmployeeCode("M001");
+                manager.setEmployeeCode("EMP001");
                 manager.setName("Manager One");
                 manager.setEmail("manager@test.com");
                 manager.setActive(true);
-
                 manager.getRoles().add(managerRole);
                 manager.getRoles().add(employeeRole);
-
                 userRepository.save(manager);
             }
 
             if (userRepository.findByUsername("user1").isEmpty()) {
                 manager = userRepository.findByUsername("manager1")
                         .orElseThrow(() ->
-                                new RuntimeException("Manager not found"));
+                                new UserNotFoundException("Manager not found"));
 
                 User employee = new User();
                 employee.setId(UUID.randomUUID().toString());
                 employee.setUsername("user1");
                 employee.setPassword(passwordEncoder().encode("user1"));
-                employee.setEmployeeCode("E001");
+                employee.setEmployeeCode("EMP002");
                 employee.setName("Employee One");
                 employee.setEmail("user@test.com");
                 employee.setManager(manager);
                 employee.setActive(true);
-
                 employee.getRoles().add(employeeRole);
-
                 userRepository.save(employee);
             }
         };
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration builder) throws Exception {
-        return builder.getAuthenticationManager();
     }
 }

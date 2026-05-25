@@ -2,9 +2,9 @@ package com.nagarro.nagp.AuthService.controller;
 
 import com.nagarro.nagp.AuthService.dto.LoginRequestDto;
 import com.nagarro.nagp.AuthService.dto.LoginResponseDto;
+import com.nagarro.nagp.AuthService.exception.UserNotFoundException;
 import com.nagarro.nagp.AuthService.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -61,29 +61,38 @@ public class AuthenticationController {
 //    }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestDto loginRequest) {
-        Authentication authentication;
-        try {
-            authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-        } catch (AuthenticationException exception) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("message", "Bad credentials");
-            map.put("status", false);
-            return new ResponseEntity<Object>(map, HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestDto loginRequest)
+            throws AuthenticationException, UserNotFoundException {
+
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+//        try {
+//            authentication = authenticationManager
+//                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+//        } catch (AuthenticationException exception) {
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("message", "Bad credentials");
+//            map.put("status", false);
+//            return new ResponseEntity<Object>(map, HttpStatus.NOT_FOUND);
+//        }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
+        String jwtToken = null;
+        List<String> roles = null;
+        LoginResponseDto response = null;
 
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        LoginResponseDto response = new LoginResponseDto(userDetails.getUsername(), roles, jwtToken);
+        if (userDetails != null) {
+            jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
+            roles = userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+            response = new LoginResponseDto(userDetails.getUsername(), roles, jwtToken);
+        } else {
+            throw new UserNotFoundException("userDetails is null");
+        }
 
         return ResponseEntity.ok(response);
     }
