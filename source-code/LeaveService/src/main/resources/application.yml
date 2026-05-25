@@ -1,14 +1,13 @@
 server:
-  port: 9010
+  port: 0
+  servlet:
+    context-path: /leave
 
 spring:
   application:
-    name: auth-service
-  app:
-    jwtSecret: mySecretKey123912738aopsgkjsebqndfsopkvajoirjgh91f2opfng2moknm
-    jwtExpirationMs: 3000000
+    name: leave-service
   datasource:
-    url: jdbc:h2:file:./data/user-db
+    url: jdbc:h2:file:./data/leave-balance-db
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -19,8 +18,12 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
-#    show-sql: true
+      ddl-auto: create-drop
+
+eureka:
+  client:
+    service-url:
+      defaultZone : http://localhost:8761/eureka/
 
 logging:
   level:
