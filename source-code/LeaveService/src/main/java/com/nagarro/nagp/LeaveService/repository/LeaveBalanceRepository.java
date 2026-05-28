@@ -11,4 +11,6 @@ import java.util.List;
 public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, LeaveBalanceId> {
 
     List<LeaveBalance> findByIdEmployeeCode(String employeeCode);
+
+    List<LeaveBalance> findByIdEmployeeCodeIn(List<String> employeeCodes);
 }

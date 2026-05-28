@@ -11,6 +11,15 @@ public class LeaveBalance {
     @EmbeddedId
     private LeaveBalanceId id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "employee_code",
+            referencedColumnName = "employee_code",
+            insertable = false,
+            updatable = false
+    )
+    private Employee employee;
+
     @Column(name = "accrued_leaves", nullable = false)
     private Integer accruedLeaves;
 

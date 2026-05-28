@@ -1,6 +1,5 @@
 package com.nagarro.nagp.AuthService.exception;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.http.HttpStatus;
@@ -20,9 +19,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid JWT token");
     }
 
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<String> handleExpiredJwtException(ExpiredJwtException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT token is expired: " + ex.getMessage());
+    @ExceptionHandler(JwtTokenException.class)
+    public ResponseEntity<String> handleJwtTokenException(JwtTokenException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error with JWT token: " + ex.getMessage());
     }
 
     @ExceptionHandler(UnsupportedJwtException.class)
@@ -38,8 +37,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAuthenticationException(AuthenticationException ex) {
         Map<String, Object> map = new HashMap<>();
-        map.put("message", "Bad credentials: " + ex.getMessage());
-        map.put("status", false);
+        map.put("message", "Login Failed: " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(map);
     }
 
