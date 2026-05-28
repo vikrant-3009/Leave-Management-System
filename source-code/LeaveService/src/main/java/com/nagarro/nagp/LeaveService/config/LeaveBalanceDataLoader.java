@@ -1,12 +1,16 @@
 package com.nagarro.nagp.LeaveService.config;
 
+import com.nagarro.nagp.LeaveService.entity.Employee;
 import com.nagarro.nagp.LeaveService.entity.LeaveBalance;
 import com.nagarro.nagp.LeaveService.entity.LeaveBalanceId;
 import com.nagarro.nagp.LeaveService.enums.LeaveType;
+import com.nagarro.nagp.LeaveService.repository.EmployeeRepository;
 import com.nagarro.nagp.LeaveService.repository.LeaveBalanceRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class LeaveBalanceDataLoader {
@@ -14,10 +18,13 @@ public class LeaveBalanceDataLoader {
     @Autowired
     private LeaveBalanceRepository leaveBalanceRepository;
 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
     @PostConstruct
     public void loadLeaveBalances() {
-        loadEmployeeLeaves("EMP001");
-        loadEmployeeLeaves("EMP002");
+        List<Employee> employees = employeeRepository.findAll();
+        employees.forEach(emp -> loadEmployeeLeaves(emp.getEmployeeCode()));
     }
 
     private void loadEmployeeLeaves(String employeeCode) {
@@ -32,16 +39,13 @@ public class LeaveBalanceDataLoader {
             int accruedLeaves
     ) {
         LeaveBalanceId id = new LeaveBalanceId(employeeCode, leaveType);
-
         if (leaveBalanceRepository.existsById(id)) {
             return;
         }
-
         LeaveBalance leaveBalance = new LeaveBalance();
         leaveBalance.setId(id);
         leaveBalance.setAccruedLeaves(accruedLeaves);
         leaveBalance.setLeavesUsed(0);
-//        leaveBalance.setMaxCarryForwardAllowed(5);
         leaveBalanceRepository.save(leaveBalance);
     }
 }

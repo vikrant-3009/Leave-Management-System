@@ -11,12 +11,14 @@ public class LoginResponseDto {
 
     private String jwtToken;
     private String username;
+    private String employeeCode;
     private List<String> roles;
 
-    public LoginResponseDto(String username, List<String> roles, String jwtToken) {
+    public LoginResponseDto(String username, String employeeCode, List<String> roles, String jwtToken) {
         this.username = username;
         this.roles = roles;
         this.jwtToken = jwtToken;
+        this.employeeCode = employeeCode;
     }
 
 }

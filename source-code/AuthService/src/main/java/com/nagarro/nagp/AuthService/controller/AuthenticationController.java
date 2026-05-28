@@ -2,18 +2,18 @@ package com.nagarro.nagp.AuthService.controller;
 
 import com.nagarro.nagp.AuthService.dto.LoginRequestDto;
 import com.nagarro.nagp.AuthService.dto.LoginResponseDto;
+import com.nagarro.nagp.AuthService.entity.CustomUserDetails;
+import com.nagarro.nagp.AuthService.exception.JwtTokenException;
 import com.nagarro.nagp.AuthService.exception.UserNotFoundException;
 import com.nagarro.nagp.AuthService.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/auth")
 public class AuthenticationController {
     @Autowired
     private JwtUtils jwtUtils;
@@ -32,33 +31,31 @@ public class AuthenticationController {
 
     @GetMapping("/hello")
     public String sayHello() {
-        return "Hello";
+        return "Hello from Auth Service...";
     }
 
-    @PreAuthorize("hasRole('EMPLOYEE')")
-    @GetMapping("/employee")
-    public String userEndpoint() {
-        return "Hello, Employee!";
-    }
+    @PostMapping("/validate-token")
+    public ResponseEntity<?> validateToken(@RequestParam("token") String token)
+            throws JwtTokenException {
+        if (token == null) {
+            throw new JwtTokenException("JWT token is required");
+        }
+        boolean isJwtValid = jwtUtils.validateJwtToken(token);
 
-    @PreAuthorize("hasRole('MANAGER')")
-    @GetMapping("/manager")
-    public String adminEndpoint() {
-        return "Hello, Manager!";
-    }
+        if (!isJwtValid) {
+            throw new JwtTokenException("JWT token is invalid");
+        }
+        String username = jwtUtils.getUserNameFromJwtToken(token);
+        List<String> roles = jwtUtils.getRolesFromJwtToken(token);
+        String employeeCode = jwtUtils.getEmployeeCodeFromJwtToken(token);
+        Map<String, Object> response = new HashMap<>();
 
-//    @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER')")
-//    @GetMapping("/leaves/{employeeId}")
-//    public List<LeaveDto> getLeaves(
-//            @PathVariable String employeeId) {
-//        return null;
-//    }
-//
-//    @PreAuthorize("hasRole('MANAGER')")
-//    @GetMapping("/team-leaves")
-//    public List<LeaveDto> getTeamLeaves() {
-//        return leaveService.getTeamLeaves();
-//    }
+        response.put("username", username);
+        response.put("roles", roles);
+        response.put("employeeCode", employeeCode);
+
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestDto loginRequest)
@@ -66,19 +63,9 @@ public class AuthenticationController {
 
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-//        try {
-//            authentication = authenticationManager
-//                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-//        } catch (AuthenticationException exception) {
-//            Map<String, Object> map = new HashMap<>();
-//            map.put("message", "Bad credentials");
-//            map.put("status", false);
-//            return new ResponseEntity<Object>(map, HttpStatus.NOT_FOUND);
-//        }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         String jwtToken = null;
         List<String> roles = null;
@@ -89,7 +76,12 @@ public class AuthenticationController {
             roles = userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
-            response = new LoginResponseDto(userDetails.getUsername(), roles, jwtToken);
+            response = new LoginResponseDto(
+                    userDetails.getUsername(),
+                    userDetails.getEmployeeCode(),
+                    roles,
+                    jwtToken
+            );
         } else {
             throw new UserNotFoundException("userDetails is null");
         }
