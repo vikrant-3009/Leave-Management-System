@@ -8,15 +8,13 @@ import com.nagarro.nagp.LeaveService.service.LeaveBalanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/balances")
 public class LeaveBalanceController {
 
     @Autowired
@@ -33,7 +31,7 @@ public class LeaveBalanceController {
      * @return a list of {@link LeaveBalanceResponseDto} representing the logged-in user's leave balances
      * @throws UserNotFoundException if the authenticated user is null or cannot be resolved
      */
-    @GetMapping("/balances/me")
+    @GetMapping("/me")
     public List<LeaveBalanceResponseDto> getMyBalances(Authentication authentication)
             throws UserNotFoundException {
         AuthenticatedUser user = (AuthenticatedUser) authentication.getPrincipal();
@@ -59,7 +57,7 @@ public class LeaveBalanceController {
     @PreAuthorize(
             "@authorizationService.canAccessEmployeeData(authentication, #employeeCode)"
     )
-    @GetMapping("/balances/{employeeCode}/type")
+    @GetMapping("/{employeeCode}/type")
     public LeaveBalanceResponseDto getLeaveBalanceByType(
             @PathVariable String employeeCode,
             @RequestParam LeaveType leaveType)
@@ -81,7 +79,7 @@ public class LeaveBalanceController {
     @PreAuthorize(
             "@authorizationService.canAccessEmployeeData(authentication, #employeeCode)"
     )
-    @GetMapping("/balances/{employeeCode}")
+    @GetMapping("/{employeeCode}")
     public List<LeaveBalanceResponseDto> getBalancesForEmployee(
             @PathVariable String employeeCode) throws UserNotFoundException {
         return leaveBalanceService.getEmployeeLeaveBalances(employeeCode);
@@ -99,7 +97,7 @@ public class LeaveBalanceController {
      * @throws UserNotFoundException if the authenticated user is null or cannot be resolved as a valid manager
      */
     @PreAuthorize("hasRole('MANAGER')")
-    @GetMapping("/balances/team")
+    @GetMapping("/team")
     public List<LeaveBalanceResponseDto> getTeamLeaveBalances(Authentication auth)
             throws UserNotFoundException {
         AuthenticatedUser user = (AuthenticatedUser) auth.getPrincipal();
