@@ -4,10 +4,7 @@ import com.nagarro.nagp.LeaveService.enums.LeaveStatus;
 import com.nagarro.nagp.LeaveService.enums.LeaveType;
 import com.nagarro.nagp.LeaveService.util.LeaveDateUtil;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -19,7 +16,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "leave_requests")
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -46,6 +44,9 @@ public class LeaveRequest {
 
     @Column(nullable = false)
     private String reason;
+
+    @Column(length = 500)
+    private String managerComments;
 
     @ManyToOne
     @JoinColumn(

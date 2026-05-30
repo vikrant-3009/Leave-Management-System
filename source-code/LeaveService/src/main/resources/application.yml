@@ -18,7 +18,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
 
 eureka:
   client:
@@ -29,9 +29,13 @@ eureka:
 
 logging:
   level:
-    org:
-      springframework: DEBUG
-      security: DEBUG
-      hibernate:
-        SQL: DEBUG
     com.nagarro.nagp: DEBUG
+
+    org.springframework.web: DEBUG
+#    org.springframework.transaction: TRACE
+    org.springframework.orm.jpa: DEBUG
+
+    org.springframework.security: DEBUG
+
+    org.hibernate.SQL: DEBUG
+#    org.hibernate.orm.jdbc.bind: TRACE
