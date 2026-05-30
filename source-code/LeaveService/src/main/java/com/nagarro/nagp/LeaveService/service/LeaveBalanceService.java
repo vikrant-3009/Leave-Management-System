@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface LeaveBalanceService {
 
-    public List<LeaveBalanceResponseDto> getEmployeeLeaveBalances(String empCode);
+    List<LeaveBalanceResponseDto> getEmployeeLeaveBalances(String empCode);
 
-    public List<LeaveBalanceResponseDto> getTeamLeaveBalances(String managerCode);
+    List<LeaveBalanceResponseDto> getTeamLeaveBalances(String managerCode);
 
-    public LeaveBalanceResponseDto getEmployeeLeaveBalanceByType(String empCode, LeaveType leaveType);
+    LeaveBalanceResponseDto getEmployeeLeaveBalanceByType(String empCode, LeaveType leaveType);
 }

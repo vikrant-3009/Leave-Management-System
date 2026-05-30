@@ -12,6 +12,7 @@ import com.nagarro.nagp.LeaveService.service.LeaveBalanceService;
 import com.nagarro.nagp.LeaveService.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class LeaveBalanceServiceImpl implements LeaveBalanceService {
     private LeaveBalanceRepository leaveBalanceRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<LeaveBalanceResponseDto> getEmployeeLeaveBalances(String empCode)
             throws UserNotFoundException {
         List<LeaveBalance> balances = leaveBalanceRepository.findByIdEmployeeCode(empCode);
@@ -44,6 +46,7 @@ public class LeaveBalanceServiceImpl implements LeaveBalanceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LeaveBalanceResponseDto> getTeamLeaveBalances(String managerCode) {
         List<Employee> employees = employeeRepository.findByManagerEmployeeCode(managerCode);
         List<String> employeeCodes = employees.stream().map(Employee::getEmployeeCode).toList();
@@ -52,6 +55,7 @@ public class LeaveBalanceServiceImpl implements LeaveBalanceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LeaveBalanceResponseDto getEmployeeLeaveBalanceByType(String empCode, LeaveType leaveType)
             throws UserNotFoundException {
         LeaveBalanceId leaveBalanceId = new LeaveBalanceId(empCode, leaveType);

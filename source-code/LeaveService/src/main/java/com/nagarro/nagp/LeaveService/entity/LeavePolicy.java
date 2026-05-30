@@ -2,11 +2,13 @@ package com.nagarro.nagp.LeaveService.entity;
 
 import com.nagarro.nagp.LeaveService.enums.LeaveType;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "leave_policies")
-@Data
+@Getter
+@Setter
 public class LeavePolicy {
 
     @Id
